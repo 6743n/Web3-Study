@@ -1,0 +1,18 @@
+<button id="action-btn">点我改变世界</button>
+
+    <script>
+        // 第一步：在茫茫人海中抓到这个按钮
+        const btn = document.getElementById('action-btn');
+
+        // 第二步：给按钮装个“耳朵”，监听点击动作
+        btn.addEventListener('click', () => {
+            // 动作 A：弹出提示
+            alert('恭喜！你触发了首个 JS 逻辑。');
+            
+            // 动作 B：物理改变背景颜色（深青色）
+            document.body.style.backgroundColor = '#0d9488';
+            
+            // 动作 C：修改按钮文字
+            btn.innerText = "世界已改变";
+        });
+    </script>
