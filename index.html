@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的 Web3 实验室</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
 </head>
 <body>
 
@@ -12,7 +13,7 @@
 
     <script>
         const btn = document.getElementById('action-btn');
-
+const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('devnet'));
         btn.addEventListener('click', async () => {
             // 【优先级 1】检测 Solana 的 Phantom 钱包
             if (window.phantom?.solana?.isPhantom) {
@@ -20,11 +21,24 @@
                     const resp = await window.phantom.solana.connect();
                     const pubKey = resp.publicKey.toString(); 
                     
-                    btn.innerText = "Solana 已连接: " + pubKey.substring(0, 4) + "...";
-                    document.body.style.backgroundColor = "#9945FF"; // Phantom 紫色
-                    console.log("Phantom 连接成功，公钥为:", pubKey);
-                } catch (err) {
-                    console.error("Phantom 连接失败:", err);
+                btn.innerText = "正在扫描 Solana 链上数据...";
+
+                // 将字符串地址转换为 Solana 认识的公钥对象
+                const publicKeyObj = new solanaWeb3.PublicKey(pubKey);
+                // 向区块链发送 RPC 请求，查询其余额（单位是 lamports）
+                const balance = await connection.getBalance(publicKeyObj);
+                // 换算成 SOL (1 SOL = 10 亿 lamports)
+                const solBalance = balance / solanaWeb3.LAMPORTS_PER_SOL;
+
+                // 更新 UI
+                btn.innerText = `公钥: ${pubKey.substring(0, 4)}... | 余额: ${solBalance} SOL`;
+                document.body.style.backgroundColor = "#9945FF"; 
+                console.log("链上扫描完成，余额为:", solBalance, "SOL");
+                // -------------------------
+                } catch (err) {console.error("操作失败:", err);
+                // 【新增这一行】：让前端 UI 给出错误反馈
+                btn.innerText = "网络拥堵或查询失败，请重试";
+                document.body.style.backgroundColor = "#EF4444"; // 变个红色警告一下
                 }
             } 
             // 【优先级 2】检测 EVM 的 MetaMask 钱包
