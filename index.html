@@ -1,18 +1,49 @@
-<button id="action-btn">点我改变世界</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的 Web3 实验室</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <button id="action-btn" style="padding: 15px 30px; font-size: 16px; cursor: pointer;">点我改变世界</button>
 
     <script>
-        // 第一步：在茫茫人海中抓到这个按钮
         const btn = document.getElementById('action-btn');
 
-        // 第二步：给按钮装个“耳朵”，监听点击动作
-        btn.addEventListener('click', () => {
-            // 动作 A：弹出提示
-            alert('恭喜！你触发了首个 JS 逻辑。');
-            
-            // 动作 B：物理改变背景颜色（深青色）
-            document.body.style.backgroundColor = '#0d9488';
-            
-            // 动作 C：修改按钮文字
-            btn.innerText = "世界已改变";
+        btn.addEventListener('click', async () => {
+            // 【优先级 1】检测 Solana 的 Phantom 钱包
+            if (window.phantom?.solana?.isPhantom) {
+                try {
+                    const resp = await window.phantom.solana.connect();
+                    const pubKey = resp.publicKey.toString(); 
+                    
+                    btn.innerText = "Solana 已连接: " + pubKey.substring(0, 4) + "...";
+                    document.body.style.backgroundColor = "#9945FF"; // Phantom 紫色
+                    console.log("Phantom 连接成功，公钥为:", pubKey);
+                } catch (err) {
+                    console.error("Phantom 连接失败:", err);
+                }
+            } 
+            // 【优先级 2】检测 EVM 的 MetaMask 钱包
+            else if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    btn.innerText = "EVM 已连接: " + accounts[0].substring(0, 6) + "...";
+                    document.body.style.backgroundColor = "#059669"; // 小狐狸绿色
+                    console.log("MetaMask 连接成功:", accounts[0]);
+                } catch (err) {
+                    console.error("MetaMask 连接失败:", err);
+                }
+            } 
+            // 都没装
+            else {
+                alert('请至少安装 Phantom 或 MetaMask 钱包！');
+            }
         });
     </script>
+
+</body>
+</html>
